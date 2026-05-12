@@ -17,18 +17,10 @@ const BASE_CATEGORIES = [
   { name: "Food",              icon: "🍱", color: "#ec4899" },
   { name: "Bills",             icon: "📋", color: "#ef4444" },
   { name: "Travel",            icon: "✈️", color: "#84cc16" },
-  { name: "Medical",           icon: "💊", color: "#14b8a6" }
-  {
-  name: "Loan EMI",
-  icon: "🏦",
-  color: "#ef4444"
-},
-{
-  name: "SIP / Investments",
-  icon: "📈",
-  color: "#22c55e"
-},,
-  { name: "School_Fees",     icon: "🎬", color: "#a855f7" },
+  { name: "Medical",           icon: "💊", color: "#14b8a6" },
+  { name: "Loan EMI",          icon: "🏦", color: "#ef4444" },
+  { name: "SIP / Investments", icon: "📈", color: "#22c55e" },
+  { name: "School_Fees",       icon: "🎬", color: "#a855f7" },
   { name: "Other",             icon: "📌", color: "#6b7280" },
 ];
 
