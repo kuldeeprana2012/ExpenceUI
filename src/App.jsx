@@ -1236,11 +1236,19 @@ useEffect(() => {
 */
 const API_BASE = "http://192.168.112.131:5000";
 
+const normalizeExpense = (item) => ({
+  ...item,
+  paymentMethod: item.paymentMethod || item.payment_method || "Cash",
+  createdAt: item.createdAt || item.created_at,
+  subcategory: item.subcategory || "",
+  notes: item.notes || "",
+});
+
 const fetchExpenses = async () => {
   try {
     const response = await fetch(`${API_BASE}/expenses`);
     const data = await response.json();
-    setExpenses(data);
+    setExpenses(Array.isArray(data) ? data.map(normalizeExpense) : []);
   } catch (error) {
     console.error("Failed to fetch expenses:", error);
   } finally {
@@ -1256,7 +1264,7 @@ useEffect(() => {
  /* const addExpense    = (d) => setExpenses(p=>[{...d,id:uid(),createdAt:new Date().toISOString()},...p]);*/
  const addExpense = async (d) => {
   try {
-    await fetch(`${API_BASE}/expenses`, {
+    const response = await fetch(`${API_BASE}/expenses`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json"
@@ -1264,7 +1272,8 @@ useEffect(() => {
       body: JSON.stringify(d)
     });
 
-    fetchExpenses();
+    if (!response.ok) throw new Error("Failed to add expense");
+    await fetchExpenses();
   } catch (error) {
     console.error("Add expense failed:", error);
   }
@@ -1272,7 +1281,7 @@ useEffect(() => {
   /*const updateExpense = (id,d)=> setExpenses(p=>p.map(e=>e.id===id?{...e,...d}:e));*/
   const updateExpense = async (id, d) => {
   try {
-    await fetch(`${API_BASE}/expenses/${id}`, {
+    const response = await fetch(`${API_BASE}/expenses/${id}`, {
       method: "PUT",
       headers: {
         "Content-Type": "application/json"
@@ -1280,7 +1289,8 @@ useEffect(() => {
       body: JSON.stringify(d)
     });
 
-    fetchExpenses();
+    if (!response.ok) throw new Error("Failed to update expense");
+    await fetchExpenses();
   } catch (error) {
     console.error("Update failed:", error);
   }
