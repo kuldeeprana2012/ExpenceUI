@@ -1197,7 +1197,7 @@ export default function App() {
   const t = darkMode ? DARK : LIGHT;
 
   // ── Load from persistent storage ──
-
+/*################
 useEffect(() => {
   try {
     const expensesData = localStorage.getItem("iq_exp");
@@ -1232,14 +1232,74 @@ useEffect(() => {
     localStorage.setItem("iq_cats", JSON.stringify(categories));
   }
 }, [categories, loaded]);
+############
+*/
+const API_BASE = "http://192.168.112.131:5000";
 
+const fetchExpenses = async () => {
+  try {
+    const response = await fetch(`${API_BASE}/expenses`);
+    const data = await response.json();
+    setExpenses(data);
+  } catch (error) {
+    console.error("Failed to fetch expenses:", error);
+  }
+};
+
+useEffect(() => {
+  fetchExpenses();
+}, []);
 
   // ── CRUD ──
-  const addExpense    = (d) => setExpenses(p=>[{...d,id:uid(),createdAt:new Date().toISOString()},...p]);
-  const updateExpense = (id,d)=> setExpenses(p=>p.map(e=>e.id===id?{...e,...d}:e));
-  const deleteExpense = (id)=>{
+ /* const addExpense    = (d) => setExpenses(p=>[{...d,id:uid(),createdAt:new Date().toISOString()},...p]);*/
+ const addExpense = async (d) => {
+  try {
+    await fetch(`${API_BASE}/expenses`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify(d)
+    });
+
+    fetchExpenses();
+  } catch (error) {
+    console.error("Add expense failed:", error);
+  }
+};
+  /*const updateExpense = (id,d)=> setExpenses(p=>p.map(e=>e.id===id?{...e,...d}:e));*/
+  const updateExpense = async (id, d) => {
+  try {
+    await fetch(`${API_BASE}/expenses/${id}`, {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify(d)
+    });
+
+    fetchExpenses();
+  } catch (error) {
+    console.error("Update failed:", error);
+  }
+};
+
+ /* const deleteExpense = (id)=>{
     if (confirm("Delete this expense?")) setExpenses(p=>p.filter(e=>e.id!==id));
-  };
+  };*/
+  const deleteExpense = async (id) => {
+  if (!confirm("Delete this expense?")) return;
+
+  try {
+    await fetch(`${API_BASE}/expenses/${id}`, {
+      method: "DELETE"
+    });
+
+    fetchExpenses();
+  } catch (error) {
+    console.error("Delete failed:", error);
+  }
+};
 
   const nav = (p) => { setPage(p); if (p!=="add") setEditing(null); };
 
