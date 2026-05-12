@@ -1243,6 +1243,8 @@ const fetchExpenses = async () => {
     setExpenses(data);
   } catch (error) {
     console.error("Failed to fetch expenses:", error);
+  } finally {
+    setLoaded(true);
   }
 };
 
