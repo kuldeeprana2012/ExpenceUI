@@ -1193,49 +1193,12 @@ export default function App() {
   const [editing,   setEditing]   = useState(null);
   const [sidebarOpen,setSidebarOpen]= useState(true);
   const [loaded,    setLoaded]    = useState(false);
+  const [offlineMode, setOfflineMode] = useState(false);
 
   const t = darkMode ? DARK : LIGHT;
 
-  // ── Load from persistent storage ──
-/*################
-useEffect(() => {
-  try {
-    const expensesData = localStorage.getItem("iq_exp");
-    if (expensesData) setExpenses(JSON.parse(expensesData));
-
-    const darkModeData = localStorage.getItem("iq_dm");
-    if (darkModeData) setDarkMode(JSON.parse(darkModeData));
-
-    const categoriesData = localStorage.getItem("iq_cats");
-    if (categoriesData) setCategories(JSON.parse(categoriesData));
-  } catch (error) {
-    console.error("Storage load error:", error);
-  }
-
-  setLoaded(true);
-}, []);
-
-useEffect(() => {
-  if (loaded) {
-    localStorage.setItem("iq_exp", JSON.stringify(expenses));
-  }
-}, [expenses, loaded]);
-
-useEffect(() => {
-  if (loaded) {
-    localStorage.setItem("iq_dm", JSON.stringify(darkMode));
-  }
-}, [darkMode, loaded]);
-
-useEffect(() => {
-  if (loaded) {
-    localStorage.setItem("iq_cats", JSON.stringify(categories));
-  }
-}, [categories, loaded]);
-############
-*/
-const API_BASE = import.meta.env.VITE_API_BASE || `http://${window.location.hostname}:5000`;
-const isOnline = useRef(true);
+  const API_BASE = import.meta.env.VITE_API_BASE || "http://192.168.112.131:5000";
+  const isOnline = useRef(true);
 
 const normalizeExpense = (item) => ({
   ...item,
@@ -1267,10 +1230,12 @@ const fetchExpenses = async () => {
     const response = await fetch(`${API_BASE}/expenses`);
     const data = await response.json();
     isOnline.current = true;
+    setOfflineMode(false);
     setExpenses(Array.isArray(data) ? data.map(normalizeExpense) : []);
   } catch (error) {
     console.error("Failed to fetch expenses:", error);
     isOnline.current = false;
+    setOfflineMode(true);
     loadLocalExpenses();
   } finally {
     setLoaded(true);
@@ -1278,13 +1243,20 @@ const fetchExpenses = async () => {
 };
 
 useEffect(() => {
-  loadLocalExpenses();
   fetchExpenses();
 }, []);
 
 useEffect(() => {
   if (loaded) saveLocalExpenses(expenses);
 }, [expenses, loaded]);
+
+useEffect(() => {
+  const onFocus = () => {
+    if (offlineMode) fetchExpenses();
+  };
+  window.addEventListener("focus", onFocus);
+  return () => window.removeEventListener("focus", onFocus);
+}, [offlineMode]);
 
   // ── CRUD ──
  /* const addExpense    = (d) => setExpenses(p=>[{...d,id:uid(),createdAt:new Date().toISOString()},...p]);*/
@@ -1303,6 +1275,7 @@ useEffect(() => {
   } catch (error) {
     console.error("Add expense failed:", error);
     isOnline.current = false;
+    setOfflineMode(true);
     setExpenses(p => [{...d, id: uid(), createdAt: new Date().toISOString()}, ...p]);
   }
 };
@@ -1322,6 +1295,7 @@ useEffect(() => {
   } catch (error) {
     console.error("Update failed:", error);
     isOnline.current = false;
+    setOfflineMode(true);
     setExpenses(p => p.map(e => e.id === id ? {...e, ...d} : e));
   }
 };
@@ -1341,6 +1315,7 @@ useEffect(() => {
   } catch (error) {
     console.error("Delete failed:", error);
     isOnline.current = false;
+    setOfflineMode(true);
     setExpenses(p => p.filter(e => e.id !== id));
   }
 };
@@ -1371,6 +1346,15 @@ useEffect(() => {
         fontFamily:"'DM Sans',sans-serif",
         transition:"background 0.3s,color 0.3s",
       }}>
+        {offlineMode && (
+          <div style={{
+            position:"fixed",top:0,left:sW,right:0,zIndex:300,
+            padding:"10px 20px",background:"#b91c1c",color:"#fff",
+            fontSize:12,textAlign:"center",
+          }}>
+            Offline mode: showing local browser cache. Data will only sync across browsers when the backend at {API_BASE} is reachable.
+          </div>
+        )}
         <Sidebar t={t} page={page} setPage={nav}
           darkMode={darkMode} setDarkMode={setDarkMode}
           open={sidebarOpen} setOpen={setSidebarOpen}/>
