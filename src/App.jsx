@@ -1073,7 +1073,7 @@ function Settings({ t, darkMode, setDarkMode, categories, setCategories, expense
   };
 
   const loadSample = ()=>{
-    const cats  = ["Home Grocery","Petrol/Fuel","Bills","Food","Shopping","Medical","Entertainment","Travel","Online Purchases"];
+    const cats  = ["Home Grocery","Petrol/Fuel","Bills","Food","Shopping","Medical","School_Fees","Travel","Online Purchases"];
     const pays  = ["UPI","Cash","Credit Card","Debit Card"];
     const texts = ["Big Bazaar","HP Petrol Pump","Electricity Bill","Swiggy Order","Amazon","Apollo Pharmacy","Movie Tickets","Auto fare","Reliance Fresh","Airtel Recharge","Zomato","Flipkart","Medplus","Netflix","BSNL Broadband"];
     const sample = [];
