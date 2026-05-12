@@ -1234,7 +1234,8 @@ useEffect(() => {
 }, [categories, loaded]);
 ############
 */
-const API_BASE = "http://192.168.112.131:5000";
+const API_BASE = import.meta.env.VITE_API_BASE || `http://${window.location.hostname}:5000`;
+const isOnline = useRef(true);
 
 const normalizeExpense = (item) => ({
   ...item,
@@ -1244,21 +1245,46 @@ const normalizeExpense = (item) => ({
   notes: item.notes || "",
 });
 
+const loadLocalExpenses = () => {
+  try {
+    const stored = localStorage.getItem("iq_exp");
+    if (stored) setExpenses(JSON.parse(stored));
+  } catch (error) {
+    console.error("Local storage load failed:", error);
+  }
+};
+
+const saveLocalExpenses = (items) => {
+  try {
+    localStorage.setItem("iq_exp", JSON.stringify(items));
+  } catch (error) {
+    console.error("Local storage save failed:", error);
+  }
+};
+
 const fetchExpenses = async () => {
   try {
     const response = await fetch(`${API_BASE}/expenses`);
     const data = await response.json();
+    isOnline.current = true;
     setExpenses(Array.isArray(data) ? data.map(normalizeExpense) : []);
   } catch (error) {
     console.error("Failed to fetch expenses:", error);
+    isOnline.current = false;
+    loadLocalExpenses();
   } finally {
     setLoaded(true);
   }
 };
 
 useEffect(() => {
+  loadLocalExpenses();
   fetchExpenses();
 }, []);
+
+useEffect(() => {
+  if (loaded) saveLocalExpenses(expenses);
+}, [expenses, loaded]);
 
   // ── CRUD ──
  /* const addExpense    = (d) => setExpenses(p=>[{...d,id:uid(),createdAt:new Date().toISOString()},...p]);*/
@@ -1276,6 +1302,8 @@ useEffect(() => {
     await fetchExpenses();
   } catch (error) {
     console.error("Add expense failed:", error);
+    isOnline.current = false;
+    setExpenses(p => [{...d, id: uid(), createdAt: new Date().toISOString()}, ...p]);
   }
 };
   /*const updateExpense = (id,d)=> setExpenses(p=>p.map(e=>e.id===id?{...e,...d}:e));*/
@@ -1293,6 +1321,8 @@ useEffect(() => {
     await fetchExpenses();
   } catch (error) {
     console.error("Update failed:", error);
+    isOnline.current = false;
+    setExpenses(p => p.map(e => e.id === id ? {...e, ...d} : e));
   }
 };
 
@@ -1303,13 +1333,15 @@ useEffect(() => {
   if (!confirm("Delete this expense?")) return;
 
   try {
-    await fetch(`${API_BASE}/expenses/${id}`, {
+    const response = await fetch(`${API_BASE}/expenses/${id}`, {
       method: "DELETE"
     });
-
-    fetchExpenses();
+    if (!response.ok) throw new Error("Failed to delete expense");
+    await fetchExpenses();
   } catch (error) {
     console.error("Delete failed:", error);
+    isOnline.current = false;
+    setExpenses(p => p.filter(e => e.id !== id));
   }
 };
 
