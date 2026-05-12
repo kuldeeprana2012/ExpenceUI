@@ -18,7 +18,7 @@ const BASE_CATEGORIES = [
   { name: "Bills",             icon: "📋", color: "#ef4444" },
   { name: "Travel",            icon: "✈️", color: "#84cc16" },
   { name: "Medical",           icon: "💊", color: "#14b8a6" },
-  { name: "Fees",     icon: "🎬", color: "#a855f7" },
+  { name: "School_Fees",     icon: "🎬", color: "#a855f7" },
   { name: "Other",             icon: "📌", color: "#6b7280" },
 ];
 
