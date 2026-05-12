@@ -1199,7 +1199,9 @@ export default function App() {
 
   const t = darkMode ? DARK : LIGHT;
 
-  const API_BASE = import.meta.env.VITE_API_BASE || "http://192.168.112.131:5000";
+  const API_BASE =
+  import.meta.env.VITE_API_BASE ||
+  `${window.location.protocol}//${window.location.hostname}:5000`;
   const isOnline = useRef(true);
 
 const normalizeExpense = (item) => ({
