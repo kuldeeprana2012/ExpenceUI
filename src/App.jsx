@@ -27,7 +27,7 @@ const BASE_CATEGORIES = [
   name: "SIP / Investments",
   icon: "📈",
   color: "#22c55e"
-},
+},,
   { name: "School_Fees",     icon: "🎬", color: "#a855f7" },
   { name: "Other",             icon: "📌", color: "#6b7280" },
 ];
